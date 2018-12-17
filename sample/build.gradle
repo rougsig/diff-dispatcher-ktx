@@ -7,8 +7,8 @@ repositories {
 
 dependencies {
     implementation project(path: ':runtime', configuration: 'default')
+    kapt project(path: ':processor', configuration: 'default')
     implementation "com.github.dimsuz:diff-dispatcher-annotations:0.9.3"
     kapt "com.github.dimsuz:diff-dispatcher-processor:0.9.3"
-    kapt project(path: ':processor', configuration: 'default')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }

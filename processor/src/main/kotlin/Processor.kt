@@ -6,6 +6,7 @@ import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.TypeSpec
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
+import java.lang.IllegalStateException
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -48,6 +49,23 @@ class Processor : KotlinAbstractProcessor() {
   }
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-    return true
+    for (type in roundEnv.getElementsAnnotatedWith(annotation)) {
+      val targetElement = type as TypeElement
+      DiffDispatcherKtxExtensionGenerator(targetElement, typeUtils).generateAndWrite()
+    }
+    return false // not claiming the annotation
+  }
+
+  private fun Generator.generateAndWrite() {
+    val fileSpec = generateFile()
+    val outputDir = generatedDir ?: mavenGeneratedDir(fileSpec.name)
+    fileSpec.writeTo(outputDir)
+  }
+
+  private fun mavenGeneratedDir(adapterName: String): File {
+    // Hack since the maven plugin doesn't supply `kapt.kotlin.generated` option
+    // Bug filed at https://youtrack.jetbrains.com/issue/KT-22783
+    val file = filer.createSourceFile(adapterName).toUri().let(::File)
+    return file.parentFile.also { file.delete() }
   }
 }
