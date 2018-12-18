@@ -11,7 +11,7 @@ data class ViewState(
   val duckName: String
 )
 
-interface Renderer {
+internal interface Renderer {
   fun renderCatName(catName: String)
   fun renderDuckName(duckName: String)
 }

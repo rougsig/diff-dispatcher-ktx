@@ -9,7 +9,6 @@ import me.eugeniomarletti.kotlin.metadata.KotlinClassMetadata
 import me.eugeniomarletti.kotlin.metadata.kotlinMetadata
 import me.eugeniomarletti.kotlin.metadata.shadow.metadata.ProtoBuf
 import me.eugeniomarletti.kotlin.metadata.visibility
-import java.lang.IllegalStateException
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.TypeElement
@@ -34,9 +33,10 @@ data class DiffElementType(
       val packageName = name.packageName
       val diffDispatcherName = "${name.simpleName}DiffDispatcher"
       val diffDispatcherBuilderClassName = ClassName.bestGuess("$packageName.$diffDispatcherName.Builder")
-      val diffReceiverTypeName = getDiffReceiverTypeName(targetElement, types)
+      val diffReceiverElement = getDiffReceiverElement(targetElement, types)
+      val diffReceiverTypeName = diffReceiverElement.asType().asTypeName()
 
-      val typeMetadata = targetElement.kotlinMetadata as? KotlinClassMetadata
+      val typeMetadata = diffReceiverElement.kotlinMetadata as? KotlinClassMetadata
       val proto = typeMetadata?.data?.classProto
       val isInternal = proto?.visibility == ProtoBuf.Visibility.INTERNAL
 
@@ -63,12 +63,12 @@ data class DiffElementType(
         .find { it.annotationType.asElement().simpleName.toString() == annotationClass.simpleName.toString() }
     }
 
-    private fun getDiffReceiverTypeName(targetElement: TypeElement, types: Types): TypeName {
+    private fun getDiffReceiverElement(targetElement: TypeElement, types: Types): TypeElement {
       val annotation = targetElement.getAnnotationMirror(DiffElement::class)
         ?: throw IllegalArgumentException("State must by provided")
       val stateValue = annotation.getFieldByName("diffReceiver")
       val stateTypeMirror = stateValue!!.value as TypeMirror
-      return (types.asElement(stateTypeMirror) as TypeElement).asType().asTypeName()
+      return (types.asElement(stateTypeMirror) as TypeElement)
     }
   }
 }
