@@ -5,6 +5,11 @@ import com.github.rougsig.diffdispatcherktx.processor.utils.className
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
+import me.eugeniomarletti.kotlin.metadata.KotlinClassMetadata
+import me.eugeniomarletti.kotlin.metadata.kotlinMetadata
+import me.eugeniomarletti.kotlin.metadata.shadow.metadata.ProtoBuf
+import me.eugeniomarletti.kotlin.metadata.visibility
+import java.lang.IllegalStateException
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.TypeElement
@@ -17,7 +22,8 @@ data class DiffElementType(
   val packageName: String,
   val diffDispatcherName: String,
   val diffDispatcherBuilderClassName: ClassName,
-  val diffReceiverTypeName: TypeName
+  val diffReceiverTypeName: TypeName,
+  val isInternal: Boolean
 ) {
   companion object {
     fun get(
@@ -30,12 +36,17 @@ data class DiffElementType(
       val diffDispatcherBuilderClassName = ClassName.bestGuess("$packageName.$diffDispatcherName.Builder")
       val diffReceiverTypeName = getDiffReceiverTypeName(targetElement, types)
 
+      val typeMetadata = targetElement.kotlinMetadata as? KotlinClassMetadata
+      val proto = typeMetadata?.data?.classProto
+      val isInternal = proto?.visibility == ProtoBuf.Visibility.INTERNAL
+
       return DiffElementType(
         name = name,
         packageName = packageName,
         diffDispatcherName = diffDispatcherName,
         diffDispatcherBuilderClassName = diffDispatcherBuilderClassName,
-        diffReceiverTypeName = diffReceiverTypeName
+        diffReceiverTypeName = diffReceiverTypeName,
+        isInternal = isInternal
       )
     }
 

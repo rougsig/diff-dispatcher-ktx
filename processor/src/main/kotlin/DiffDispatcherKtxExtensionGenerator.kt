@@ -13,6 +13,7 @@ internal class DiffDispatcherKtxExtensionGenerator(
           addFunction(
             FunSpec
               .builder("target")
+              .apply { if (el.isInternal) addModifiers(KModifier.INTERNAL) }
               .returns(el.diffDispatcherBuilderClassName)
               .receiver(DiffDispatcherKtx::class)
               .addParameter(ParameterSpec.builder("target", el.diffReceiverTypeName).build())
