@@ -1,12 +1,9 @@
 package com.github.rougsig.diffdispatcherktx.processor
 
 import com.github.dimsuz.diffdispatcher.annotations.DiffElement
-import com.github.rougsig.diffdispatcherktx.processor.utils.Logger
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.TypeSpec
 import me.eugeniomarletti.kotlin.processing.KotlinAbstractProcessor
 import java.io.File
-import java.lang.IllegalStateException
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -26,7 +23,6 @@ class Processor : KotlinAbstractProcessor() {
 
   private val annotation = DiffElement::class.java
   private var generatedType: TypeElement? = null
-  private lateinit var logger: Logger
 
   override fun getSupportedAnnotationTypes() = setOf(annotation.canonicalName)
 
@@ -36,7 +32,6 @@ class Processor : KotlinAbstractProcessor() {
 
   override fun init(processingEnv: ProcessingEnvironment) {
     super.init(processingEnv)
-    logger = Logger(messager)
     generatedType = processingEnv.options[OPTION_GENERATED]?.let {
       if (it !in POSSIBLE_GENERATED_NAMES) {
         throw IllegalArgumentException(
@@ -49,10 +44,11 @@ class Processor : KotlinAbstractProcessor() {
   }
 
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-    for (type in roundEnv.getElementsAnnotatedWith(annotation)) {
-      val targetElement = type as TypeElement
-      DiffDispatcherKtxExtensionGenerator(targetElement, typeUtils).generateAndWrite()
-    }
+    val diffElements = roundEnv
+      .getElementsAnnotatedWith(annotation)
+      .map { DiffElementType.get(it as TypeElement, typeUtils) }
+      .toList()
+    if (diffElements.isNotEmpty()) DiffDispatcherKtxExtensionGenerator(diffElements).generateAndWrite()
     return false // not claiming the annotation
   }
 
