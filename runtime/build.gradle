@@ -6,6 +6,7 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "com.github.dimsuz:diff-dispatcher-annotations:0.9.3"
 }
 
 apply from: '../gradle/gradle-mvn-push.gradle'

@@ -22,6 +22,14 @@ fun main(args: Array<String>) {
     override fun renderDuckName(duckName: String) = Unit
   }
 
+  val config = object : Config<ViewState> {
+    override val diffDispatcher = DiffDispatcherKtx.target(renderer).build()
+  }
+
   val dispatcher: DiffDispatcher<ViewState> = DiffDispatcherKtx.target(renderer).build()
   println("Generated")
+}
+
+interface Config<VS> {
+  val diffDispatcher: DiffDispatcher<VS>?
 }
