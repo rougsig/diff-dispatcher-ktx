@@ -2,8 +2,8 @@ package com.github.rougsig.diffdispatcherktx.runtime
 
 import java.lang.IllegalStateException
 
-object DiffDispatcherKtx
+object DiffDispatcher
 
-fun DiffDispatcherKtx.target(target: Any): DiffDispatcherBuilder {
+fun DiffDispatcher.target(target: Any): DiffDispatcherBuilder {
   throw IllegalStateException("DiffDispatcher class not generated.")
 }

@@ -1,9 +1,9 @@
 package com.github.rougsig.diffdispatcherktx.sample
 
-import com.github.dimsuz.diffdispatcher.DiffDispatcher
 import com.github.dimsuz.diffdispatcher.annotations.DiffElement
-import com.github.rougsig.diffdispatcherktx.runtime.DiffDispatcherKtx
+import com.github.rougsig.diffdispatcherktx.runtime.DiffDispatcher
 import com.github.rougsig.diffdispatcherktx.runtime.target
+import com.github.dimsuz.diffdispatcher.DiffDispatcher as BaseDiffDispatcher
 
 @DiffElement(Screen.Renderer::class)
 data class ViewState(
@@ -25,13 +25,13 @@ fun main(args: Array<String>) {
   }
 
   val config = object : Config<ViewState> {
-    override val diffDispatcher = DiffDispatcherKtx.target(renderer).build()
+    override val diffDispatcher = DiffDispatcher.target(renderer).build()
   }
 
-  val dispatcher: DiffDispatcher<ViewState> = DiffDispatcherKtx.target(renderer).build()
+  val dispatcher: BaseDiffDispatcher<ViewState> = DiffDispatcher.target(renderer).build()
   println("Generated")
 }
 
 interface Config<VS> {
-  val diffDispatcher: DiffDispatcher<VS>?
+  val diffDispatcher: BaseDiffDispatcher<VS>?
 }
