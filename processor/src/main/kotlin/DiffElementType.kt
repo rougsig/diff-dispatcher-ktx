@@ -9,9 +9,7 @@ import me.eugeniomarletti.kotlin.metadata.KotlinClassMetadata
 import me.eugeniomarletti.kotlin.metadata.kotlinMetadata
 import me.eugeniomarletti.kotlin.metadata.shadow.metadata.ProtoBuf
 import me.eugeniomarletti.kotlin.metadata.visibility
-import javax.lang.model.element.AnnotationMirror
-import javax.lang.model.element.AnnotationValue
-import javax.lang.model.element.TypeElement
+import javax.lang.model.element.*
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Types
 import kotlin.reflect.KClass
@@ -36,9 +34,7 @@ data class DiffElementType(
       val diffReceiverElement = getDiffReceiverElement(targetElement, types)
       val diffReceiverTypeName = diffReceiverElement.asType().asTypeName()
 
-      val typeMetadata = diffReceiverElement.kotlinMetadata as? KotlinClassMetadata
-      val proto = typeMetadata?.data?.classProto
-      val isInternal = proto?.visibility == ProtoBuf.Visibility.INTERNAL
+      val isInternal = diffReceiverElement.isInternal || diffReceiverElement.enclosingElement.isInternal
 
       return DiffElementType(
         name = name,
@@ -70,5 +66,13 @@ data class DiffElementType(
       val stateTypeMirror = stateValue!!.value as TypeMirror
       return (types.asElement(stateTypeMirror) as TypeElement)
     }
+
+    private val Element.isInternal: Boolean
+      get() {
+        val typeMetadata = kotlinMetadata as? KotlinClassMetadata
+        val proto = typeMetadata?.data?.classProto
+
+        return proto?.visibility == ProtoBuf.Visibility.INTERNAL
+      }
   }
 }
